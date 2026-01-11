@@ -34,7 +34,7 @@ Instance.new("UICorner", toggle).CornerRadius = UDim.new(0,8)
 
 --// FRAME PRINCIPAL
 local frame = Instance.new("Frame")
-frame.Size = UDim2.fromOffset(240,300)
+frame.Size = UDim2.fromOffset(240,260)
 frame.Position = UDim2.fromScale(0.35,0.35)
 frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 frame.BorderSizePixel = 0
@@ -72,16 +72,12 @@ local setBtn    = mkBtn("SETAR POSIÇÃO",40,Color3.fromRGB(0,170,255))
 local goBtn     = mkBtn("IR ATÉ POSIÇÃO",75,Color3.fromRGB(0,200,120))
 local noclipBtn = mkBtn("NOCLIP: OFF",110,Color3.fromRGB(200,80,80))
 local arBtn     = mkBtn("ANTI RAGDOLL: OFF",145,Color3.fromRGB(200,80,80))
-local atpBtn    = mkBtn("ANTI TP: OFF",180,Color3.fromRGB(200,80,80))
-local speedBtn  = mkBtn("",215,Color3.fromRGB(120,120,255))
+local speedBtn  = mkBtn("",180,Color3.fromRGB(120,120,255))
 
 --// VARIÁVEIS
 local savedAttachment
 local noclip = false
 local antiRagdoll = false
-local antiTP = false
-local allowTP = false
-local lastSafeCF
 local noclipConn
 
 --// TOGGLE MENU
@@ -90,7 +86,7 @@ toggle.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
---// SPEED SYSTEM (100% FUNCIONAL)
+--// SPEED SYSTEM
 --------------------------------------------------
 local speedLevel = 1
 local baseSpeed = 16
@@ -136,12 +132,11 @@ setBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------
---// IR ATÉ POSIÇÃO (IGNORA ANTI TP)
+--// IR ATÉ POSIÇÃO (SEM ANTI TP)
 --------------------------------------------------
 goBtn.MouseButton1Click:Connect(function()
 	if not savedAttachment then return end
 	local _,hrp = getChar()
-	allowTP = true
 
 	local start = hrp.CFrame
 	local target = savedAttachment.WorldCFrame
@@ -154,10 +149,6 @@ goBtn.MouseButton1Click:Connect(function()
 		if alpha >= 1 then
 			hrp.CFrame = target
 			conn:Disconnect()
-			task.delay(0.2,function()
-				allowTP = false
-				lastSafeCF = hrp.CFrame
-			end)
 			return
 		end
 		hrp.CFrame = start:Lerp(target, alpha)
@@ -208,25 +199,4 @@ arBtn.MouseButton1Click:Connect(function()
 	antiRagdoll = not antiRagdoll
 	arBtn.Text = antiRagdoll and "ANTI RAGDOLL: ON" or "ANTI RAGDOLL: OFF"
 	arBtn.BackgroundColor3 = antiRagdoll and Color3.fromRGB(80,200,120) or Color3.fromRGB(200,80,80)
-end)
-
---------------------------------------------------
---// ANTI TP
---------------------------------------------------
-atpBtn.MouseButton1Click:Connect(function()
-	antiTP = not antiTP
-	atpBtn.Text = antiTP and "ANTI TP: ON" or "ANTI TP: OFF"
-	atpBtn.BackgroundColor3 = antiTP and Color3.fromRGB(80,200,120) or Color3.fromRGB(200,80,80)
-end)
-
-RunService.RenderStepped:Connect(function()
-	if not antiTP or allowTP then return end
-	local _,hrp = getChar()
-	if not lastSafeCF then lastSafeCF = hrp.CFrame return end
-
-	if (hrp.Position - lastSafeCF.Position).Magnitude > 25 then
-		hrp.CFrame = lastSafeCF
-	else
-		lastSafeCF = hrp.CFrame
-	end
 end)
